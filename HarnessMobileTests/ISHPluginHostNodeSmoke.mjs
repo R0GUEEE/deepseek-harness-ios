@@ -776,7 +776,7 @@ try {
     'https://codeload.github.com/example/plugin/zip/main',
   )
   assert.equal(
-    parseMarketReadme('### 工具与能力\n- [Native hint](https://github.com/example/native-hint) - safe tools\n')[0].nativeInstallStrategy,
+    parseMarketReadme('### Tools and capabilities\n- [Native hint](https://github.com/example/native-hint) - safe tools\n')[0].nativeInstallStrategy,
     'native-first',
   )
 
@@ -789,7 +789,7 @@ try {
       error.cause = Object.assign(new Error('mirror unavailable'), { code: 'ENETUNREACH' })
       throw error
     }
-    const markdown = '### 工具与能力\n- [Fallback plugin](https://github.com/example/fallback-plugin) — Local Host fallback\n'
+    const markdown = '### Tools and capabilities\n- [Fallback plugin](https://github.com/example/fallback-plugin) — Local Host fallback\n'
     const bytes = Buffer.from(markdown)
     let consumed = false
     return {

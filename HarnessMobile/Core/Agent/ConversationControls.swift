@@ -26,22 +26,22 @@ enum ToolPermissionMode: String, Codable, CaseIterable, Sendable, Identifiable {
     var title: String {
         switch self {
         case .readOnly:
-            "只读"
+            "Read-only"
         case .workspaceWrite:
-            "工作区写入"
+            "Workspace write"
         case .dangerFullAccess:
-            "完全访问"
+            "Full access"
         }
     }
 
     var compactTitle: String {
         switch self {
         case .readOnly:
-            "只读"
+            "Read-only"
         case .workspaceWrite:
-            "写入"
+            "Write"
         case .dangerFullAccess:
-            "完全"
+            "Full"
         }
     }
 
@@ -287,11 +287,11 @@ enum ConversationControlError: LocalizedError, Sendable, Equatable {
     var errorDescription: String? {
         switch self {
         case .invalidQueuedInput:
-            "排队输入不能为空或超过 64 KiB。"
+            "Queued input must not be empty or exceed 64 KiB."
         case .queueFull:
-            "当前会话最多排队 32 条输入。"
+            "The current session can queue at most 32 inputs."
         case .queuedInputNotFound:
-            "找不到要编辑的排队输入。"
+            "Queued input to edit not found."
         }
     }
 }

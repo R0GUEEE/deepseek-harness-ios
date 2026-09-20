@@ -18,7 +18,7 @@ final class SlashCommandCoreTests: XCTestCase {
             )
         )
         XCTAssertEqual(
-            InputTriggerDetector.detect("第一行\n@worker"),
+            InputTriggerDetector.detect("First line\n@worker"),
             InputTriggerHit(
                 trigger: .at,
                 query: "worker",
@@ -35,7 +35,7 @@ final class SlashCommandCoreTests: XCTestCase {
     }
 
     func testInputTriggerDetectorUsesNearestTokenAndRevisionGuardedReplacement() {
-        let draft = "先处理 /goal @worker"
+        let draft = "Handle /goal @worker first"
         let hit = InputTriggerDetector.detect(
             draft,
             draftRevision: 7
@@ -51,7 +51,7 @@ final class SlashCommandCoreTests: XCTestCase {
                     currentRevision: 7
                 )
             },
-            "先处理 /goal @researcher "
+            "First handle /goal @researcher "
         )
         XCTAssertNil(
             hit.flatMap {
@@ -66,7 +66,7 @@ final class SlashCommandCoreTests: XCTestCase {
     }
 
     func testQuotedFileTriggerTracksWhitespaceUnicodeAndDraftRevision() throws {
-        let draft = "前文已编辑 @\"Docs/deep re"
+        let draft = "Earlier text edited @\"Docs/deep re"
         let hit = try XCTUnwrap(
             InputTriggerDetector.detect(
                 draft,
@@ -77,7 +77,7 @@ final class SlashCommandCoreTests: XCTestCase {
         XCTAssertEqual(hit.trigger, .at)
         XCTAssertEqual(hit.query, "Docs/deep re")
         XCTAssertTrue(hit.quoted)
-        XCTAssertEqual(hit.span.start, Array("前文已编辑 ").count)
+        XCTAssertEqual(hit.span.start, Array("Preceding text was edited ").count)
         XCTAssertEqual(hit.span.end, Array(draft).count)
         XCTAssertEqual(
             InputTriggerDetector.replacing(
@@ -86,11 +86,11 @@ final class SlashCommandCoreTests: XCTestCase {
                 with: "@\"Docs/deep report.md\" ",
                 currentRevision: 12
             ),
-            "前文已编辑 @\"Docs/deep report.md\" "
+            "Earlier text edited @\"Docs/deep report.md\" "
         )
         XCTAssertNil(
             InputTriggerDetector.replacing(
-                "新前缀" + draft,
+                "New prefix" + draft,
                 span: hit.span,
                 with: "@\"Docs/deep report.md\" ",
                 currentRevision: 13
@@ -109,15 +109,15 @@ final class SlashCommandCoreTests: XCTestCase {
     func testAddressedSubagentInputRequiresDurableUUIDAndMessage() {
         let address = "A24CBBD8-D577-4A9F-AEFC-26FC9C9AFEA4"
         XCTAssertEqual(
-            AddressedSubagentInputParser.parse("@\(address) 继续检查缓存"),
+            AddressedSubagentInputParser.parse("@\(address) keep checking the cache"),
             AddressedSubagentInput(
                 address: address.lowercased(),
-                message: "继续检查缓存"
+                message: "Keep checking the cache"
             )
         )
-        XCTAssertNil(AddressedSubagentInputParser.parse("@worker 继续"))
+        XCTAssertNil(AddressedSubagentInputParser.parse("@worker continue"))
         XCTAssertNil(AddressedSubagentInputParser.parse("@\(address)"))
-        XCTAssertNil(AddressedSubagentInputParser.parse("普通消息 @\(address) 继续"))
+        XCTAssertNil(AddressedSubagentInputParser.parse("Regular message @\(address) continue"))
         XCTAssertNil(
             AddressedSubagentInputParser.parse(
                 "@\(address) "
@@ -175,7 +175,7 @@ final class SlashCommandCoreTests: XCTestCase {
 
         let messageID = try XCTUnwrap(UUID(uuidString: "A24CBBD8-D577-4A9F-AEFC-26FC9C9AFEA4"))
         guard case let .prepared(note) = await registry.prepare(
-            "/feedback \(messageID.uuidString) note 需要补充回归测试"
+            "/feedback \(messageID.uuidString) note regression tests needed"
         ) else {
             return XCTFail("expected /feedback note to prepare")
         }
@@ -184,7 +184,7 @@ final class SlashCommandCoreTests: XCTestCase {
             return XCTFail("expected note feedback action")
         }
         XCTAssertEqual(parsedID, messageID)
-        XCTAssertEqual(text, "需要补充回归测试")
+        XCTAssertEqual(text, "Need to add regression tests")
     }
 
     func testFeedbackCommandRejectsUnknownOperationAndOversizedNote() async {

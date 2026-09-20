@@ -719,7 +719,7 @@ enum ISHPluginHostDynamicHarnessBridge {
             encode: { toolExecutionInput($0, checkpoint: point.rawValue) },
             decode: { value, _ in try toolDecision(value) },
             onFailure: { message, _ in
-                .deny(reason: "iSH 沙箱策略不可用，已拒绝执行：\(bounded(message, maximum: 512))")
+                .deny(reason: "The iSH sandbox policy is unavailable; execution was refused: \(bounded(message, maximum: 512))")
             }
         )
     }

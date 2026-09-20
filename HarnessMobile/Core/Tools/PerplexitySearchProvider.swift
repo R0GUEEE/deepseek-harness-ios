@@ -61,11 +61,11 @@ struct PerplexitySearchProvider: WebSearchProvider {
     var errorDescription: String? {
         switch self {
         case .missingCredential:
-            "Perplexity 搜索需要 Perplexity API key；当前配置缺失。"
+            "Perplexity search needs a Perplexity API key; it is missing from the current configuration."
         case let .transport(detail):
             detail
         case let .endpoint(status, detail):
-            "Perplexity 搜索端点返回 \(status)。\(detail)"
+            "The Perplexity search endpoint returned \(status). \(detail)"
         }
     }
 }

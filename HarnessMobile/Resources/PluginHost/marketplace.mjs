@@ -428,21 +428,47 @@ function cleanCategoryHeading(raw) {
     .trim()
 }
 
+// The upstream catalog headings are Chinese, while the app presents canonical
+// English categories. Both spellings normalize to the same value so the
+// compatibility hints keep matching, whatever language the remote README uses.
+const CATEGORY_ALIASES = new Map([
+  ['工具与能力', 'Tools and capabilities'],
+  ['Tools and capabilities', 'Tools and capabilities'],
+  ['技能包', 'Skills'],
+  ['Skills', 'Skills'],
+  ['工作流与自动化', 'Workflow and automation'],
+  ['Workflow and automation', 'Workflow and automation'],
+  ['记忆', 'Memory'],
+  ['Memory', 'Memory'],
+  ['主题与外观', 'Themes and appearance'],
+  ['Themes and appearance', 'Themes and appearance'],
+  ['桌面与外观', 'Desktop and appearance'],
+  ['Desktop and appearance', 'Desktop and appearance'],
+  ['其他', 'Other'],
+  ['Other', 'Other'],
+])
+
+function canonicalCategory(raw) {
+  return CATEGORY_ALIASES.get(raw) ?? raw
+}
+
 function catalogCompatibility(category) {
-  if (category === '工具与能力' || category === '技能包'
-    || category === '工作流与自动化' || category === '记忆') {
+  const normalized = canonicalCategory(category)
+  if (normalized === 'Tools and capabilities' || normalized === 'Skills'
+    || normalized === 'Workflow and automation' || normalized === 'Memory') {
     return { compatibility: 'supported' }
   }
   return {
     compatibility: 'review',
-    reason: '不会因分类拒绝安装：将先尝试原生编译，再在手机 iSH 中加载。桌面 Web Client 专属效果若没有手机等价实现，会在安装结果中明确说明。',
+    reason: 'The category never blocks an install: the app tries native compilation first and then loads the plugin in the on-device iSH. Desktop-only Web Client effects with no mobile equivalent are reported explicitly in the install result.',
   }
 }
 
 function catalogNativeInstallStrategy(category) {
   // This is only a catalog hint. prepare-native performs the source-level
   // decision and Swift validation remains authoritative.
-  return category === '主题与外观' || category === '桌面与外观'
+  const normalized = canonicalCategory(category)
+  return normalized === 'Themes and appearance' || normalized === 'Desktop and appearance'
     ? 'ish-required'
     : 'native-first'
 }
@@ -451,11 +477,12 @@ export function parseMarketReadme(markdown) {
   if (typeof markdown !== 'string') fail('invalid-market', 'Market README must be text.')
   const items = []
   const seen = new Set()
-  let category = '其他'
+  let category = 'Other'
   for (const line of markdown.split(/\r?\n/)) {
     const heading = line.match(/^###\s+(.+?)\s*$/)
     if (heading !== null) {
-      category = cleanCategoryHeading(heading[1]) || '其他'
+      const headingText = cleanCategoryHeading(heading[1])
+      category = headingText === '' ? 'Other' : canonicalCategory(headingText)
       continue
     }
     const match = line.match(/^-\s+\[([^\]]+)]\((https:\/\/github\.com\/[^)]+)\)\s+(?:—|-)\s+(.+)$/)

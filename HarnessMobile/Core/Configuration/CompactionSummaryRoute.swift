@@ -47,13 +47,13 @@ enum CompactionSummaryRouteError: LocalizedError, Sendable, Equatable {
     var errorDescription: String? {
         switch self {
         case let .missingProfile(profileID):
-            return "压缩摘要使用的 Provider Profile“\(profileID)”已不存在。"
+            return "The provider profile \"\(profileID)\" used for compaction summaries no longer exists."
         case .invalidModel:
-            return "压缩摘要模型 ID 不能为空，且不能超过 256 字节。"
+            return "The compaction summary model ID must not be empty or longer than 256 bytes."
         case let .modelUnavailable(profileID, model):
-            return "Provider Profile“\(profileID)”中没有压缩摘要模型“\(model)”。"
+            return "Provider Profile \"\(profileID)\" has no compaction summary model \"\(model)\"."
         case .profileBusy:
-            return "当前任务仍在运行，停止任务后才能切换压缩摘要模型。"
+            return "The task is still running. Stop it before switching the compaction summary model."
         }
     }
 }

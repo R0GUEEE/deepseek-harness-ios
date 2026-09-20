@@ -55,13 +55,13 @@ struct HarnessBrowserTool: LocalAgentTool {
     }
 
     func summary(arguments: [String: JSONValue]) -> String {
-        guard let action = try? parseAction(arguments) else { return "使用本机隔离浏览器" }
+        guard let action = try? parseAction(arguments) else { return "Use the on-device isolated browser" }
         switch action {
-        case .open, .navigate: return "在本机隔离浏览器中导航"
-        case .readText: return "读取本机浏览器页面文字"
-        case .screenshot: return "捕获本机浏览器页面截图"
-        case .close: return "关闭本机浏览器标签页"
-        case .listTabs: return "列出当前会话浏览器标签页"
+        case .open, .navigate: return "Navigate in the on-device isolated browser"
+        case .readText: return "Read page text from the on-device browser"
+        case .screenshot: return "Capture a screenshot of the on-device browser page"
+        case .close: return "Close an on-device browser tab"
+        case .listTabs: return "List the current session's browser tabs"
         }
     }
 

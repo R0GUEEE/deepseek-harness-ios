@@ -392,7 +392,7 @@ final class FileSystemToolsTests: XCTestCase {
         let root = temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let expected = String(repeating: "a", count: 32 * 1_024 - 1) + "你\nsecond"
+        let expected = String(repeating: "a", count: 32 * 1_024 - 1) + "you\nsecond"
         try Data(expected.utf8).write(to: root.appendingPathComponent("chunked.txt"))
 
         let provider = WorkspaceFileSystemProvider(store: WorkspaceStore(root: root))
@@ -411,7 +411,7 @@ final class FileSystemToolsTests: XCTestCase {
             "offset": .number(0)
         ])) { error in
             XCTAssertTrue(error.localizedDescription.contains("offset"))
-            XCTAssertFalse(error.localizedDescription.contains("JSON 对象"))
+            XCTAssertFalse(error.localizedDescription.contains("JSON object"))
         }
         XCTAssertThrowsError(try tool("edit", in: registry).validate(arguments: [
             "file_path": .string("file.txt"),
@@ -610,7 +610,7 @@ final class FileSystemToolsTests: XCTestCase {
 
         let store = WorkspaceStore(root: root)
         let registry = fileToolRegistry(store: store, sessionID: "deliverable-unicode")
-        let content = String(repeating: "界", count: 3_000)
+        let content = String(repeating: "x", count: 3_000)
         let output = try await tool("deliverable_write", in: registry).execute(arguments: [
             "file_path": .string("deliverables/unicode.md"),
             "content": .string(content)

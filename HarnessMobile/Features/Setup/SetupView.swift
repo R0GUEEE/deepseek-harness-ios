@@ -101,20 +101,20 @@ struct SetupView: View {
     private var navigationTitle: String {
         switch mode {
         case .onboarding:
-            "配置 Harness"
+            "Set up Harness"
         case .editing, .profile:
-            "编辑服务商"
+            "Edit provider"
         case .addingCatalog:
-            "添加服务商"
+            "Add provider"
         case .addingCustom:
-            "自定义服务商"
+            "Custom provider"
         }
     }
 
     private var keyPlaceholder: String {
         guard let existingProfile else { return "API Key" }
         return model.credentialStatus(for: existingProfile) == .configured
-            ? "API Key（留空则保留）"
+            ? "API key (leave blank to keep)"
             : "API Key"
     }
 
@@ -125,7 +125,7 @@ struct SetupView: View {
     }
 
     private var selectedModelLabel: String {
-        guard !draft.model.isEmpty else { return "未选择" }
+        guard !draft.model.isEmpty else { return "None selected" }
         return visibleCatalog.models.first(where: { $0.id == draft.model })?.name
             ?? draft.model
     }
@@ -227,7 +227,7 @@ struct SetupView: View {
             .toolbar {
                 if mode != .onboarding {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("取消") {
+                        Button("Cancel") {
                             dismiss()
                         }
                     }
@@ -257,7 +257,7 @@ struct SetupView: View {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Text(mode == .onboarding ? "保存并开始" : "保存")
+                        Text(mode == .onboarding ? "Save and start" : "Save")
                             .fontWeight(.semibold)
                     }
                 }
@@ -283,9 +283,9 @@ struct SetupView: View {
         Section {
             if canChangeCatalogProvider {
                 HStack {
-                    Text("服务商")
+                    Text("Provider")
                     Spacer()
-                    Picker("服务商", selection: providerSelection) {
+                    Picker("Provider", selection: providerSelection) {
                         ForEach(ModelProviderCatalog.providers) { provider in
                             Text(provider.displayName).tag(provider.id)
                         }
@@ -296,11 +296,11 @@ struct SetupView: View {
                     .accessibilityIdentifier("provider-picker")
                 }
             } else {
-                LabeledContent("Provider ID", value: profileID.isEmpty ? "未填写" : profileID)
+                LabeledContent("Provider ID", value: profileID.isEmpty ? "Not set" : profileID)
             }
 
             if mode == .addingCustom || (mode == .onboarding && isCustomProfile) {
-                TextField("例如 acme-gateway", text: $profileID)
+                TextField("For example, acme-gateway", text: $profileID)
                     .accessibilityIdentifier("provider-id-field")
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -308,25 +308,25 @@ struct SetupView: View {
             }
 
             if mode != .onboarding || isCustomProfile {
-                TextField("显示名称", text: $displayName)
+                TextField("Display name", text: $displayName)
                     .accessibilityIdentifier("provider-display-name-field")
                     .focused($focusedField, equals: .displayName)
             }
 
             if isCustomProfile {
-                LabeledContent("API 协议", value: "OpenAI Chat Completions")
+                LabeledContent("API protocol", value: "OpenAI Chat Completions")
             } else {
                 Text(provider.detail)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
         } header: {
-            Text("服务商")
+            Text("Provider")
         } footer: {
             if mode == .onboarding {
-                Text("稍后可以在设置中修改名称、地址、密钥和模型。")
+                Text("You can change the name, address, key and model later in settings.")
             } else {
-                Text("Provider ID 会写入会话和凭据引用，保存后不能改名；显示名称、地址、密钥和模型目录仍可编辑。")
+                Text("The Provider ID is written into sessions and credential references and cannot be renamed after saving; the display name, URL, key and model catalog stay editable.")
             }
         }
     }
@@ -349,35 +349,35 @@ struct SetupView: View {
             .focused($focusedField, equals: .apiKey)
             .disabled(isDiscoveringModels)
 
-            DisclosureGroup("OAuth grant（高级）") {
+            DisclosureGroup("OAuth grant (advanced)") {
                 SecureField("Access token", text: $oauthAccessToken)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                SecureField("Refresh token（可选）", text: $oauthRefreshToken)
+                SecureField("Refresh token (optional)", text: $oauthRefreshToken)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                TextField("Token endpoint HTTPS URL（可选）", text: $oauthTokenEndpoint)
+                TextField("Token endpoint HTTPS URL (optional)", text: $oauthTokenEndpoint)
                     .keyboardType(.URL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                TextField("Client ID（可选）", text: $oauthClientID)
+                TextField("Client ID (optional)", text: $oauthClientID)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                TextField("过期时间 ISO 8601（可选）", text: $oauthExpiresAt)
+                TextField("Expiration ISO 8601 (optional)", text: $oauthExpiresAt)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Text("填写 access token 后保存即可作为本 Profile 的凭据；不填写则保留已有 grant。")
+                Text("Enter an access token and save it to use as this profile's credential; leave it blank to keep the existing grant.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
             .disabled(isDiscoveringModels)
         } header: {
-            Text("连接")
+            Text("Connection")
         } footer: {
             Text(
                 mode == .onboarding
-                    ? "API Key 或 OAuth grant 只存本机 Keychain；模型请求发往所选服务商，Agent Loop 和工具仍在 iPhone 本机执行。"
-                    : "API Key 或 OAuth grant 只写入该 Provider ID 的本机 Keychain 项，并绑定当前 HTTPS 域名和端口。模型推理走所选服务商，Agent Loop 和工具仍在这台 iPhone 内执行。"
+                    ? "The API key or OAuth grant is stored only in the on-device Keychain; model requests go to the selected provider, while the Agent loop and tools still run on this iPhone."
+                    : "The API key or OAuth grant is written only to the on-device Keychain item for this Provider ID and is bound to the current HTTPS host and port. Model inference goes to the selected provider, while the Agent loop and tools still run on this iPhone."
             )
         }
     }
@@ -385,7 +385,7 @@ struct SetupView: View {
     private var modelSection: some View {
         Section {
             if visibleCatalog.models.isEmpty {
-                Label("当前目录没有内建模型", systemImage: "tray")
+                Label("No built-in models in the current catalog", systemImage: "tray")
                     .foregroundStyle(.secondary)
             } else {
                 NavigationLink {
@@ -394,12 +394,12 @@ struct SetupView: View {
                         selection: $draft.model
                     )
                 } label: {
-                    LabeledContent("目录选择", value: selectedModelLabel)
+                    LabeledContent("Catalog", value: selectedModelLabel)
                 }
                 .accessibilityIdentifier("model-catalog-link")
             }
 
-            TextField("手动模型 ID", text: $draft.model)
+            TextField("Manual model ID", text: $draft.model)
                 .accessibilityIdentifier("model-field")
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
@@ -410,7 +410,7 @@ struct SetupView: View {
                 isLoading: isDiscoveringModels
             )
 
-            Button("刷新模型", systemImage: "arrow.clockwise") {
+            Button("Refresh models", systemImage: "arrow.clockwise") {
                 Task {
                     await discoverModels(forceRefresh: true)
                 }
@@ -435,19 +435,19 @@ struct SetupView: View {
                     .foregroundStyle(.red)
             }
         } header: {
-            Text("模型")
+            Text("Model")
         } footer: {
             Text(
                 mode == .onboarding
-                    ? "可从目录选择或直接填写模型 ID；刷新目录只临时使用当前 Key。"
-                    : "目录之外的模型可直接填写。刷新时，当前输入的 Key 只用于本次同源 /models 请求；请求完成后该字段会清空，保存前需要重新输入。"
+                    ? "Pick from the catalog or type a model ID; refreshing the catalog only uses the current key temporarily."
+                    : "Models outside the catalog can be entered directly. When refreshing, the key you enter is used only for this same-origin /models request; the field is cleared once the request finishes, so re-enter it before saving."
             )
         }
     }
 
     private var inferenceSection: some View {
         Section {
-            Picker("思考模式", selection: $draft.reasoningMode) {
+            Picker("Thinking mode", selection: $draft.reasoningMode) {
                 ForEach(draft.supportedReasoningModes
                     ?? ReasoningMode.supportedModes(for: draft.providerID)) { mode in
                     Text(mode.title).tag(mode)
@@ -455,29 +455,29 @@ struct SetupView: View {
             }
 
             if provider.wireProtocol == .openAIChatCompletions {
-                Picker("兼容协议", selection: wireProfileBinding) {
+                Picker("Compatible protocol", selection: wireProfileBinding) {
                     ForEach(OpenAICompatibleWireProfile.allCases) { profile in
                         Text(profile.title).tag(profile)
                     }
                 }
-                Text("私有网关默认使用保守模式；只有网关明确支持时才开启 OpenAI 或 DeepSeek 扩展字段。")
+                Text("Private gateways default to conservative mode; enable OpenAI or DeepSeek extension fields only when the gateway explicitly supports them.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
 
-                DisclosureGroup("高级网关兼容") {
+                DisclosureGroup("Advanced gateway compatibility") {
                     Toggle(
-                        "发送 reasoning_effort",
+                        "Send reasoning_effort",
                         isOn: compatibilityBoolBinding(\.supportsReasoningEffort)
                     )
                     Toggle(
-                        "流式返回用量",
+                        "Return usage in the stream",
                         isOn: compatibilityBoolBinding(\.supportsUsageInStreaming)
                     )
                     Toggle(
-                        "使用 developer 角色",
+                        "Use the developer role",
                         isOn: compatibilityBoolBinding(\.supportsDeveloperRole)
                     )
-                    Picker("输出 Token 字段", selection: maxTokensFieldBinding) {
+                    Picker("Output token field", selection: maxTokensFieldBinding) {
                         Text("max_tokens").tag(
                             OpenAICompletionsCompatibility.MaxTokensField.maxTokens
                         )
@@ -486,64 +486,64 @@ struct SetupView: View {
                         )
                     }
                     Toggle(
-                        "工具结果附带 name",
+                        "Attach name to tool results",
                         isOn: compatibilityBoolBinding(\.requiresToolResultName)
                     )
                     Toggle(
-                        "工具结果后补 assistant",
+                        "Add assistant after tool results",
                         isOn: compatibilityBoolBinding(\.requiresAssistantAfterToolResult)
                     )
                     Toggle(
-                        "思考内容转为文本标签",
+                        "Turn thinking into text tags",
                         isOn: compatibilityBoolBinding(\.requiresThinkingAsText)
                     )
                     Toggle(
-                        "回放 reasoning_content",
+                        "Replay reasoning_content",
                         isOn: compatibilityBoolBinding(
                             \.requiresReasoningContentOnAssistantMessages
                         )
                     )
-                    Button("恢复预设兼容项") {
+                    Button("Restore preset compatibility") {
                         draft.openAICompatibility = nil
                     }
                 }
             }
 
-            Picker("失败重试", selection: retryModeBinding) {
+            Picker("Retry on failure", selection: retryModeBinding) {
                 ForEach(ProviderRetryPolicyConfiguration.Mode.allCases) { mode in
                     Text(mode.title).tag(mode)
                 }
             }
             if effectiveRetryPolicy.mode == .normal {
-                TextField("最大重试次数", value: retryCountBinding, format: .number)
+                TextField("Max retries", value: retryCountBinding, format: .number)
                     .keyboardType(.numberPad)
             } else {
-                Text("持续重试会在每次失败后有界退避，直到成功、手动停止或 App 终止；每次重试仍写入轨迹。")
+                Text("Continuous retry backs off in a bounded way after each failure until it succeeds, is stopped manually, or the app terminates; every retry is still written to the trajectory.")
                     .font(.footnote)
                     .foregroundStyle(.orange)
             }
 
-            LabeledContent("Agent 循环", value: "无 App 总步数限制")
-            Text("单次模型响应建议最多调用 8 个工具，手机同时执行最多 2 个并发安全工具，其余自动排队。Anthropic 扩展思考需保存签名块，当前仅开放服务默认和关闭。")
+            LabeledContent("Agent loop", value: "No app-wide step limit")
+            Text("A single model response should call at most 8 tools; the phone runs up to 2 concurrency-safe tools at once and queues the rest. Anthropic extended thinking needs signature blocks stored, so only provider default and off are available for now.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         } header: {
-            Label("推理", systemImage: "cpu")
+            Label("Reasoning", systemImage: "cpu")
         }
     }
 
     private var securitySection: some View {
         Section {
             Label(
-                "API Key 与 OAuth grant 仅保存在本机 Keychain，不进入会话、日志或工具环境。",
+                "API keys and OAuth grants are kept only in the on-device Keychain and never enter sessions, logs or the tool environment.",
                 systemImage: "lock.shield"
             )
             Label(
-                "移动端 BYOK 无法像自有后端那样完全隐藏 Key；建议使用独立、限额、可撤销的密钥。",
+                "BYOK on mobile cannot hide the key as completely as your own backend; use a separate, rate-limited, revocable key.",
                 systemImage: "exclamationmark.shield"
             )
         } header: {
-            Text("安全边界")
+            Text("Security boundary")
         }
     }
 
@@ -882,9 +882,9 @@ private struct ModelCatalogStatusView: View {
             if isLoading {
                 ProgressView()
                     .controlSize(.small)
-                Text("正在获取模型…")
+                Text("Fetching models…")
             } else {
-                Label("\(sourceTitle) · \(catalog.models.count) 项", systemImage: sourceIcon)
+                Label("\(sourceTitle) · \(catalog.models.count) items", systemImage: sourceIcon)
             }
             Spacer()
             if let fetchedAt = catalog.fetchedAt, !isLoading {
@@ -900,11 +900,11 @@ private struct ModelCatalogStatusView: View {
     private var sourceTitle: String {
         switch catalog.source {
         case .builtIn:
-            return "内建目录"
+            return "Built-in catalog"
         case .remote:
-            return "服务商返回"
+            return "From provider"
         case .cache:
-            return "本机缓存"
+            return "On-device cache"
         }
     }
 
@@ -953,9 +953,9 @@ private struct ModelSelectionView: View {
                 ContentUnavailableView.search(text: searchText)
             }
         }
-        .navigationTitle("选择模型")
+        .navigationTitle("Select model")
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $searchText, prompt: "搜索模型 ID 或名称")
+        .searchable(text: $searchText, prompt: "Search model ID or name")
     }
 }
 
@@ -994,10 +994,10 @@ private struct ModelSelectionRow: View {
     private var capacityDescription: String? {
         var parts: [String] = []
         if let contextWindow = model.contextWindow {
-            parts.append("上下文 \(contextWindow.formatted())")
+            parts.append("Context \(contextWindow.formatted())")
         }
         if let maxOutputTokens = model.maxOutputTokens {
-            parts.append("最大输出 \(maxOutputTokens.formatted())")
+            parts.append("Max output \(maxOutputTokens.formatted())")
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
@@ -1012,13 +1012,13 @@ private enum SetupOAuthError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .accessTokenRequired:
-            "填写 refresh token 或过期时间前，请先填写 access token。"
+            "Enter the access token before the refresh token or expiry."
         case .invalidExpiry:
-            "OAuth 过期时间必须是 ISO 8601 格式。"
+            "The OAuth expiration must be in ISO 8601 format."
         case .invalidEndpoint:
-            "OAuth token endpoint URL 无效。"
+            "Invalid OAuth token endpoint URL."
         case .endpointAndClientIDRequired:
-            "填写 token endpoint 时必须同时填写 client ID，反之亦然。"
+            "If you enter a token endpoint you must also enter a client ID, and vice versa."
         }
     }
 }

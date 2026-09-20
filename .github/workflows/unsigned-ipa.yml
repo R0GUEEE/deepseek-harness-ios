@@ -28,6 +28,10 @@ on:
         description: "Publish a GitHub release with the IPA"
         type: boolean
         default: true
+      run_tests:
+        description: "Run the SwiftPM unit tests (diagnostic, non-blocking)"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -151,6 +155,15 @@ jobs:
           set -euo pipefail
           ./Scripts/audit-no-remote-execution.sh 2>&1 | tail -30 || true
 
+      - name: Run SwiftPM unit tests (diagnostic)
+        if: inputs.run_tests
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          set -o pipefail
+          swift test --package-path . --scratch-path /tmp/hm-build 2>&1 | tee /tmp/swift-test.log | tail -60
+          echo "swift test exit: ${PIPESTATUS[0]}"
+
       - name: Archive unsigned app
         run: |
           set -euo pipefail
@@ -209,6 +222,7 @@ jobs:
             /tmp/ish-build.log
             /tmp/archive.log
             /tmp/fetch-upstreams.log
+            /tmp/swift-test.log
             Vendor/OpenMinisISH/Artifacts/SHA256SUMS
 
       - name: Upload IPA

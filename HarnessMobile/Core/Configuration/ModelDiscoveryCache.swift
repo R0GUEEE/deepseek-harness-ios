@@ -174,9 +174,9 @@ enum ModelDiscoveryCacheError: LocalizedError, Sendable {
     var errorDescription: String? {
         switch self {
         case .invalidModels:
-            return "模型发现缓存包含无效模型数据。"
+            return "The model discovery cache contains invalid model data."
         case .cacheTooLarge:
-            return "模型发现缓存超过 4 MiB 上限。"
+            return "The model discovery cache exceeds the 4 MiB limit."
         }
     }
 }

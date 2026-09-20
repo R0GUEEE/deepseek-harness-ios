@@ -56,11 +56,11 @@ final class OutputRetentionTests: XCTestCase {
     }
 
     func testCutsNeverSplitMultibyteCharacters() {
-        // 汉字 are three bytes each; a byte budget of 4 must keep exactly one.
-        let text = "字字字字"
+        // "→" is three bytes in UTF-8; a byte budget of 4 must keep exactly one.
+        let text = "→→→→"
         let head = OutputRetention.safeHead(text, maxBytes: 4)
-        XCTAssertEqual(head, "字")
+        XCTAssertEqual(head, "→")
         let tail = OutputRetention.safeTail(text, maxBytes: 4)
-        XCTAssertEqual(tail, "字")
+        XCTAssertEqual(tail, "→")
     }
 }

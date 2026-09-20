@@ -118,25 +118,25 @@ enum ShareHandoffError: LocalizedError, Sendable, Equatable {
     var errorDescription: String? {
         switch self {
         case .appGroupUnavailable:
-            "共享扩展暂不可用：App Group 容器未配置。"
+            "The share extension is unavailable: the App Group container is not configured."
         case .invalidEnvelope:
-            "共享内容信封无效，已安全丢弃。"
+            "The shared content envelope is invalid and was safely discarded."
         case let .unsupportedType(type):
-            "共享内容类型不受支持：\(type)。"
+            "Unsupported shared content type: \(type)."
         case .emptyShare:
-            "没有可接收的共享内容。"
+            "No shared content to receive."
         case let .tooManyItems(limit):
-            "共享内容最多支持 \(limit) 项。"
+            "Sharing supports at most \(limit) items."
         case let .itemTooLarge(limit):
-            "共享单项超过 \(limit) 字节上限。"
+            "A shared item exceeds the \(limit) byte limit."
         case let .totalTooLarge(limit):
-            "共享内容总大小超过 \(limit) 字节上限。"
+            "Total shared content exceeds the \(limit) byte limit."
         case .queueFull:
-            "共享内容队列已满，请先打开 Harness 再继续分享。"
+            "The share queue is full. Open Harness first, then keep sharing."
         case .expired:
-            "共享内容已过期，请重新分享。"
+            "The shared content expired; share it again."
         case let .claimNotFound(id):
-            "找不到共享内容 \(id.uuidString)。"
+            "Shared content \(id.uuidString) not found."
         }
     }
 }

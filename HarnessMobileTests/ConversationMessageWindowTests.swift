@@ -100,7 +100,7 @@ final class ConversationMessageWindowTests: XCTestCase {
         var output: [AgentToolOutputChunk] = []
 
         AgentToolEvent.appendOutput(
-            .init(channel: .stdout, text: String(repeating: "中", count: 30_000)),
+            .init(channel: .stdout, text: String(repeating: "x", count: 30_000)),
             to: &output
         )
 

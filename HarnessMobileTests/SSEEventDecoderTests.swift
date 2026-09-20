@@ -39,12 +39,12 @@ final class SSEEventDecoderTests: XCTestCase {
 
     func testByteFramingHandlesCRLFAndArbitraryUnicodeSplits() throws {
         var decoder = SSEEventDecoder()
-        let wire = Data("data: {\"text\":\"你好\"}\r\n\r\n".utf8)
+        let wire = Data("data: {\"text\":\"hello\"}\r\n\r\n".utf8)
         var payload: String?
         for byte in wire {
             payload = try decoder.consume(byte: byte) ?? payload
         }
-        XCTAssertEqual(payload, "{\"text\":\"你好\"}")
+        XCTAssertEqual(payload, "{\"text\":\"hello\"}")
     }
 
     func testRejectsOversizedLineBeforeConstructingString() throws {

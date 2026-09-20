@@ -54,7 +54,7 @@ final class ContactsSearchToolTests: XCTestCase {
     }
 
     func testOutputEnforcesRecordAndFieldBoundaries() async throws {
-        let longName = String(repeating: "名", count: 200)
+        let longName = String(repeating: "Name", count: 200)
         let records = (0..<25).map { index in
             DeviceContactRecord(
                 name: "\(longName)\(index)",
@@ -71,7 +71,7 @@ final class ContactsSearchToolTests: XCTestCase {
         let tool = ContactsSearchTool(provider: provider)
 
         let result = try decodeObject(try await tool.execute(arguments: [
-            "query": .string("名"),
+            "query": .string("Name"),
             "limit": .number(2),
         ]))
         guard case let .array(contacts) = result["contacts"] else {
@@ -105,14 +105,14 @@ final class ContactsSearchToolTests: XCTestCase {
 
     func testTypedPermissionDenialPropagates() async {
         let tool = ContactsSearchTool(
-            provider: ContactSearchProviderFake(error: .permissionDenied("联系人"))
+            provider: ContactSearchProviderFake(error: .permissionDenied("Contacts"))
         )
 
         do {
             _ = try await tool.execute(arguments: ["query": .string("Alice")])
             XCTFail("Expected permission denial")
         } catch let error as MobileNativeToolError {
-            XCTAssertEqual(error, .permissionDenied("联系人"))
+            XCTAssertEqual(error, .permissionDenied("Contacts"))
         } catch {
             XCTFail("Unexpected error: \(error)")
         }

@@ -44,7 +44,7 @@ final class ToolResultOutputPolicyTests: XCTestCase {
                 maximumSpillBytes: 64 * 1_024
             )
         )
-        let full = String(repeating: "完整结果🙂\n", count: 700)
+        let full = String(repeating: "Full result🙂\n", count: 700)
         let value = JSONValue.object(["kind": .string("canonical")])
 
         let projected = try await policy.project(
@@ -159,7 +159,7 @@ final class ToolResultOutputPolicyTests: XCTestCase {
         } catch let error as ToolResultOutputPolicyError {
             XCTAssertTrue(error.originalWasError)
             XCTAssertTrue(error.originalPreview.hasPrefix("ORIGINAL_ERROR"))
-            XCTAssertTrue(error.localizedDescription.contains("无法保存完整内容"))
+            XCTAssertTrue(error.localizedDescription.contains("Could not save the full content"))
         } catch {
             XCTFail("Expected ToolResultOutputPolicyError, got \(error)")
         }
