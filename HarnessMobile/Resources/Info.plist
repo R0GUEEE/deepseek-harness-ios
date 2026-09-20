@@ -28,49 +28,49 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NFCReaderUsageDescription</key>
-	<string>仅在你主动批准 NFC 工具时开启一次系统扫描会话。</string>
+	<string>Only starts a single system scan session when you deliberately approve the NFC tool.</string>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>仅在你批准媒体工具时访问本机音乐资料库。</string>
+	<string>Only accesses the on-device music library when you approve the media tool.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>仅在你批准蓝牙工具时扫描或连接附近的 BLE 设备。</string>
+	<string>Only scans for or connects to nearby BLE devices when you approve the Bluetooth tool.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>仅在你批准蓝牙工具时与附近的 BLE 设备通信。</string>
+	<string>Only communicates with nearby BLE devices when you approve the Bluetooth tool.</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>仅在你批准日历工具时查询或修改日程。</string>
+	<string>Only queries or changes events when you approve the calendar tool.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>仅在你批准日历工具时查询或修改日程。</string>
+	<string>Only queries or changes events when you approve the calendar tool.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>仅在你主动拍照并交给本地 OCR 工具时使用相机。</string>
+	<string>Only used when you deliberately take a photo and hand it to the local OCR tool.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>仅在你批准联系人搜索工具时读取有限的姓名、电话和邮箱。</string>
+	<string>Only reads limited names, phone numbers and email addresses when you approve the contact search tool.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>用于在执行敏感本机操作前验证设备所有者。</string>
+	<string>Used to verify the device owner before sensitive on-device operations.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>仅在你调用并批准 Apple 健康工具时读取所选健康数据；工具结果会发送给当前配置的模型服务并保存在本机会话中。</string>
+	<string>Only reads the health data you select when you call and approve an Apple Health tool; tool results are sent to the configured model service and kept in the on-device session.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>仅在你调用并批准 Apple 健康写入工具时写入所选健康数据。</string>
+	<string>Only writes the health data you select when you call and approve an Apple Health write tool.</string>
 	<key>NSHomeKitUsageDescription</key>
-	<string>当前构建未获得 HomeKit capability；取得签名能力后，才会在你批准时查询或控制智能家居配件。</string>
+	<string>This build has no HomeKit capability; once signing grants it, accessories are queried or controlled only when you approve.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>仅在你批准需要访问同一局域网设备的功能时使用本地网络。</string>
+	<string>Only uses the local network for features that need to reach devices on the same LAN when you approve them.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>仅在你明确开启后台粗略定位保活并允许 Always 定位后，于后台任务运行期间使用约 3 公里精度的位置服务；不会存储或显示位置坐标。</string>
+	<string>Only after you explicitly enable background coarse-location keep-alive and allow Always location: uses roughly 3 km accuracy while a background task runs. Coordinates are never stored or shown.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>仅在你批准定位工具时获取一次当前定位，不进行后台跟踪。</string>
+	<string>Only fetches your location once when you approve the location tool; no background tracking.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>仅在你主动使用语音输入时访问麦克风。</string>
+	<string>Only accesses the microphone when you deliberately use voice input.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>仅在你批准运动工具时读取最近的本机运动活动估计。</string>
+	<string>Only reads recent on-device motion activity estimates when you approve the motion tool.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>仅在你批准照片工具保存结果时写入照片图库。</string>
+	<string>Only writes to your photo library when you approve saving a result from the photo tool.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>仅在你主动选择图片供本地 OCR 分析时读取所选内容。</string>
+	<string>Only reads the items you deliberately pick for local OCR analysis.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>仅在你批准提醒事项工具时查询或修改提醒。</string>
+	<string>Only queries or changes reminders when you approve the reminders tool.</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>仅在你批准提醒事项工具时查询或修改提醒。</string>
+	<string>Only queries or changes reminders when you approve the reminders tool.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>仅在你主动使用语音转文字时进行语音识别。</string>
+	<string>Only performs speech recognition when you deliberately use speech-to-text.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -23,15 +23,15 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>仅在你主动拍照并交给本地 OCR 工具时使用相机。</string>
+	<string>Only used when you deliberately take a photo and hand it to the local OCR tool.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>仅在你主动选择图片供本地 OCR 分析时读取所选内容。</string>
+	<string>Only reads the items you deliberately pick for local OCR analysis.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>仅在你批准定位工具时获取一次当前定位，不进行后台跟踪。</string>
+	<string>Only fetches your location once when you approve the location tool; no background tracking.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>仅在你批准运动工具时读取最近的本机运动活动估计。</string>
+	<string>Only reads recent on-device motion activity estimates when you approve the motion tool.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>用于在执行敏感本机操作前验证设备所有者。</string>
+	<string>Used to verify the device owner before sensitive on-device operations.</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.llf.harnessmobile.continued-processing.*</string>
