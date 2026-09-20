@@ -1,0 +1,243 @@
+name: Unsigned IPA
+
+# Builds HarnessMobile end to end on a GitHub-hosted macOS runner:
+#   1. fetch the pinned iSH / OpenMinis sources and rebuild the HarnessISH
+#      XCFramework plus the Alpine fakefs rootfs (Scripts/build-ish-sandbox.sh)
+#   2. re-generate HarnessMobile.xcodeproj from project.yml (pinned XcodeGen)
+#   3. archive the app unsigned and package Payload/ into an IPA
+#
+# Manual dispatch only (a push trigger and a dispatch run share the same
+# concurrency group and would cancel each other).
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "What to run"
+        type: choice
+        options:
+          - all
+          - libraries
+          - app-only
+        default: all
+      tag:
+        description: "Release tag for the produced IPA"
+        type: string
+        default: "hmb-ci-1"
+      release:
+        description: "Publish a GitHub release with the IPA"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: unsigned-ipa
+  cancel-in-progress: false
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_INSTALL_CLEANUP: "1"
+  HOMEBREW_NO_ENV_HINTS: "1"
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 330
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Show toolchain
+        run: |
+          set -euo pipefail
+          echo "runner: $(uname -m) / macOS $(sw_vers -productVersion)"
+          xcodebuild -version
+          echo "developer dir: $(xcode-select -p)"
+          echo "iphoneos SDK: $(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iphonesimulator SDK: $(xcrun --sdk iphonesimulator --show-sdk-version)"
+          echo "swift: $(swift --version 2>&1 | head -1)"
+          echo "python3: $(python3 --version 2>&1)"
+          echo "jq: $(jq --version)"
+          ls /Applications | grep -i '^Xcode' || true
+
+      - name: Install host build tools
+        run: |
+          set -euo pipefail
+          brew install llvm lld ninja libarchive ripgrep
+          echo "llvm clang: $(/opt/homebrew/opt/llvm/bin/clang --version | head -1)"
+          echo "lld: $(/opt/homebrew/opt/lld/bin/ld.lld --version)"
+
+      - name: Restore upstream source cache
+        uses: actions/cache@v4
+        with:
+          path: Vendor/UpstreamSources
+          key: upstreams-${{ hashFiles('Dependencies/upstreams.lock.json') }}
+
+      - name: Restore pinned tool cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .tools
+            Vendor/OpenMinisISH/downloads
+          key: tools-${{ hashFiles('Dependencies/upstreams.lock.json') }}
+
+      - name: Restore built iSH artifact cache
+        uses: actions/cache@v4
+        with:
+          path: Vendor/OpenMinisISH/Artifacts
+          key: ish-artifacts-${{ hashFiles('Dependencies/upstreams.lock.json', 'Scripts/build-ish-sandbox.sh', 'Vendor/OpenMinisISH/patches/*.patch', 'Vendor/OpenMinisISH/meson/*.in') }}
+
+      - name: Fetch pinned upstreams
+        run: |
+          set -euo pipefail
+          ./Scripts/fetch-upstreams.sh 2>&1 | tee /tmp/fetch-upstreams.log
+          git -C Vendor/UpstreamSources/ishArm64 log -1 --oneline
+          git -C Vendor/UpstreamSources/openminis log -1 --oneline
+
+      - name: Build HarnessISH XCFramework and Alpine rootfs
+        if: inputs.stage != 'app-only'
+        env:
+          ISH_KEEP_BUILD_DIR: "1"
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          export PATH="/opt/homebrew/opt/llvm/bin:/opt/homebrew/opt/lld/bin:$PATH"
+          mode="all"
+          [ "${{ inputs.stage }}" = "libraries" ] && mode="libraries"
+          time ./Scripts/build-ish-sandbox.sh "$mode" 2>&1 | tee /tmp/ish-build.log
+          ls -la Vendor/OpenMinisISH/Artifacts
+          cat Vendor/OpenMinisISH/Artifacts/SHA256SUMS
+
+      - name: Reconcile artifact lock with the locally rebuilt hashes
+        id: lock
+        run: |
+          set -euo pipefail
+          changed=0
+          reconcile() {
+            local path="$1" source="$2" actual expected
+            if [ ! -f "$path" ]; then
+              echo "::error::missing built artifact $path"
+              return 1
+            fi
+            actual="$(shasum -a 256 "$path" | awk '{print $1}')"
+            expected="$(jq -r --arg p "$path" '.artifacts[] | select(.path == $p) | .sha256' Dependencies/artifacts.lock.json)"
+            if [ "$actual" = "$expected" ]; then
+              echo "OK       $path"
+            else
+              echo "REBUILT  $path"
+              echo "           locked:  $expected"
+              echo "           rebuilt: $actual"
+              ./Scripts/record-artifact.sh "$path" "$source" false
+              changed=1
+            fi
+          }
+          reconcile Vendor/OpenMinisISH/Artifacts/HarnessISH.xcframework.zip openminis-ishArm64
+          reconcile Vendor/OpenMinisISH/Artifacts/RootfsPatch.bundle.zip ishArm64
+          reconcile Vendor/OpenMinisISH/Artifacts/alpine-rootfs.zip alpineRootfs-openminis-ishArm64
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Regenerate Xcode project from project.yml
+        run: |
+          set -euo pipefail
+          ./Scripts/regenerate-project.sh
+          git status --porcelain | head -20 || true
+
+      - name: Device-only execution boundary audit (diagnostic)
+        run: |
+          set -euo pipefail
+          ./Scripts/audit-no-remote-execution.sh 2>&1 | tail -30 || true
+
+      - name: Archive unsigned app
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          xcodebuild \
+            -project HarnessMobile.xcodeproj \
+            -scheme HarnessMobile \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            -archivePath build/HarnessMobile.xcarchive \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            archive 2>&1 | tee /tmp/archive.log
+
+      - name: Package unsigned IPA
+        id: package
+        run: |
+          set -euo pipefail
+          app="build/HarnessMobile.xcarchive/Products/Applications/HarnessMobile.app"
+          if [ ! -d "$app" ]; then
+            echo "::error::app bundle not found in the archive"
+            find build -maxdepth 5 -name '*.app' -print
+            exit 1
+          fi
+          version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Info.plist")"
+          build_number="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app/Info.plist")"
+          echo "version=$version build=$build_number"
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R "$app" build/Payload/HarnessMobile.app
+          ipa="HarnessMobile-${version}-unsigned.ipa"
+          ( cd build && zip -qry "../$ipa" Payload )
+          echo "ipa=$ipa" >> "$GITHUB_OUTPUT"
+          echo "--- bundle ---"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' build/Payload/HarnessMobile.app/Info.plist
+          /usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' build/Payload/HarnessMobile.app/Info.plist
+          lipo -archs build/Payload/HarnessMobile.app/HarnessMobile
+          ls build/Payload/HarnessMobile.app/PlugIns 2>/dev/null || true
+          echo "--- ipa ---"
+          unzip -l "$ipa" | tail -20
+          du -h "$ipa"
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            /tmp/ish-build.log
+            /tmp/archive.log
+            /tmp/fetch-upstreams.log
+            Vendor/OpenMinisISH/Artifacts/SHA256SUMS
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: HarnessMobile-unsigned-ipa
+          if-no-files-found: error
+          retention-days: 30
+          path: ${{ steps.package.outputs.ipa }}
+
+      - name: Upload refreshed artifact lock
+        if: steps.lock.outputs.changed == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-lock-updated
+          retention-days: 30
+          path: Dependencies/artifacts.lock.json
+
+      - name: Publish release
+        if: inputs.release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: "Harness Mobile unsigned ${{ inputs.tag }}"
+          body: |
+            Unsigned `HarnessMobile` IPA built by GitHub Actions.
+
+            - commit: `${{ github.sha }}`
+            - runner: `macos-26`
+            - artifact lock refreshed: `${{ steps.lock.outputs.changed }}`
+          files: ${{ steps.package.outputs.ipa }}
+          fail_on_unmatched_files: true
