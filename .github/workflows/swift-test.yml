@@ -1,0 +1,33 @@
+name: SwiftPM tests
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: swift test
+        continue-on-error: true
+        run: |
+          set -uo pipefail
+          swift --version
+          swift test --package-path . --scratch-path /tmp/hm-build 2>&1 | tee /tmp/swift-test.log | tail -40
+          echo "swift test exit: ${PIPESTATUS[0]}"
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-test-log-${{ github.ref_name }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: /tmp/swift-test.log
