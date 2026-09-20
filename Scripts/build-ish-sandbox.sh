@@ -511,7 +511,7 @@ smoke_test_xcframework_slice() {
     -lsqlite3 \
     -lresolv \
     -o "$objc_executable"
-  "$lipo" -verify_arch arm64 "$objc_executable"
+  verify_slice_arch "$objc_executable" arm64
 
   /usr/bin/printf '%s\n' \
     'import Foundation' \
@@ -559,7 +559,7 @@ smoke_test_xcframework_slice() {
     -lsqlite3 \
     -lresolv \
     -o "$swift_executable"
-  "$lipo" -verify_arch arm64 "$swift_executable"
+  verify_slice_arch "$swift_executable" arm64
 }
 
 deterministic_zip_directory() {
@@ -594,6 +594,22 @@ canonicalize_xcframework_info() {
   /usr/bin/plutil -convert xml1 -o "$xcframework/Info.plist" "$sorted"
 }
 
+verify_slice_arch() {
+  local library="$1"
+  local arch="$2"
+
+  # Older cctools accept `lipo -verify_arch <arch> <file>`, while current
+  # Xcode requires the input file first: `lipo <file> -verify_arch <arch>`.
+  # Accept either spelling so the build works on both toolchains.
+  if "$lipo" "$library" -verify_arch "$arch" >/dev/null 2>&1; then
+    return 0
+  fi
+  if "$lipo" -verify_arch "$arch" "$library" >/dev/null 2>&1; then
+    return 0
+  fi
+  fail "library does not contain the $arch slice: $library"
+}
+
 build_libraries() {
   local device_symbols
   local symbol
@@ -623,8 +639,8 @@ build_libraries() {
     "$work_root/build-iphonesimulator/libfakefs.a" \
     "$work_root/bridge-iphonesimulator/libHarnessISHBridge.a"
 
-  "$lipo" -verify_arch arm64 "$device_library"
-  "$lipo" -verify_arch arm64 "$simulator_library"
+  verify_slice_arch "$device_library" arm64
+  verify_slice_arch "$simulator_library" arm64
   device_symbols="$work_root/device-symbols.txt"
   "$nm" -gU "$device_library" > "$device_symbols"
   grep '_ish_set_guest_network_enabled' "$device_symbols" >/dev/null \
