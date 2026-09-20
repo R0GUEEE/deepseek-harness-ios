@@ -80,7 +80,7 @@ targets:
         NSPhotoLibraryAddUsageDescription: Only writes to your photo library when you approve saving a result from the photo tool.
         NSContactsUsageDescription: Only reads limited names, phone numbers and email addresses when you approve the contact search tool.
         NSLocationWhenInUseUsageDescription: Only fetches your location once when you approve the location tool; no background tracking.
-        NSLocationAlwaysAndWhenInUseUsageDescription: Only after you explicitly enable background coarse-location keep-alive and allow Always location: uses roughly 3 km accuracy while a background task runs. Coordinates are never stored or shown.
+        NSLocationAlwaysAndWhenInUseUsageDescription: 'Only after you explicitly enable background coarse-location keep-alive and allow Always location — roughly 3 km accuracy is used while a background task runs. Coordinates are never stored or shown.'
         NSMotionUsageDescription: Only reads recent on-device motion activity estimates when you approve the motion tool.
         NSMicrophoneUsageDescription: Only accesses the microphone when you deliberately use voice input.
         NSSpeechRecognitionUsageDescription: Only performs speech recognition when you deliberately use speech-to-text.

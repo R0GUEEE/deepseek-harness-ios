@@ -54,7 +54,7 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Only uses the local network for features that need to reach devices on the same LAN when you approve them.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Only after you explicitly enable background coarse-location keep-alive and allow Always location: uses roughly 3 km accuracy while a background task runs. Coordinates are never stored or shown.</string>
+	<string>Only after you explicitly enable background coarse-location keep-alive and allow Always location — roughly 3 km accuracy is used while a background task runs. Coordinates are never stored or shown.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Only fetches your location once when you approve the location tool; no background tracking.</string>
 	<key>NSMicrophoneUsageDescription</key>
