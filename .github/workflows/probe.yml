@@ -1,0 +1,55 @@
+name: Toolchain probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Runner and Xcode inventory
+        run: |
+          set -x
+          uname -m
+          sw_vers
+          xcode-select -p
+          xcodebuild -version
+          ls -1 /Applications | grep -i xcode || true
+          for x in /Applications/Xcode*.app; do
+            echo "$x -> $(defaults read "$x/Contents/Info" CFBundleShortVersionString 2>/dev/null)"
+          done
+          for app in /Applications/Xcode*.app; do
+            dev="$app/Contents/Developer"
+            echo "== $app"
+            ls "$dev/Platforms/iPhoneOS.platform/Developer/SDKs" 2>/dev/null || true
+          done
+          xcrun --sdk iphoneos --show-sdk-version
+          xcrun --sdk iphonesimulator --show-sdk-version
+          swift --version
+          python3 --version
+          jq --version
+          which rg || echo "no rg"
+          df -h /
+
+      - name: Install host build tools
+        run: |
+          set -euo pipefail
+          export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 HOMEBREW_NO_ENV_HINTS=1
+          brew install llvm lld ninja libarchive ripgrep
+          /opt/homebrew/opt/llvm/bin/clang --version | head -2
+          /opt/homebrew/opt/lld/bin/ld.lld --version
+          ls /opt/homebrew/opt/libarchive/lib | head
+          ninja --version
+          rg --version | head -1
+
+      - name: Fetch pinned upstreams
+        run: |
+          set -euo pipefail
+          ./Scripts/fetch-upstreams.sh
+          du -sh Vendor/UpstreamSources/*
+          git -C Vendor/UpstreamSources/ishArm64 ls-tree HEAD deps/
+          ls Vendor/UpstreamSources/ishArm64/tools/
